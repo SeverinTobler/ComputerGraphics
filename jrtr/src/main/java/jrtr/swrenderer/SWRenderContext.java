@@ -285,14 +285,10 @@ public class SWRenderContext implements RenderContext {
 				Vector4f p = new Vector4f(raw[i*n],raw[i*n+1],raw[i*n+2],1);
 
 				t.transform(p);
-				//M.transform(p);
-				//C.transform(p);
-				//P.transform(p);
-				//D.transform(p);
 
 				int x = (int) (p.x/p.w);
 				int y = (int) (p.y/p.w);
-				if(x<0 || x>colorBuffer.getWidth() || y<0 || y>colorBuffer.getHeight())
+				if(x<0 || x>=colorBuffer.getWidth() || y<0 || y>=colorBuffer.getHeight())
 					continue;
 				int c = 0xFFFFFF;
 				colorBuffer.setRGB(x, y, c);
