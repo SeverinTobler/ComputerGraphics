@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;simple.cylinder&apos; to &apos;Cylinder&apos;&#x0A;- Original project: &apos;simple&apos;&#x0A;- Original element: &apos;simple.cylinder&apos;&#x0A;- Renamed element: &apos;simple.Cylinder&apos;&#x0A;- Update references to refactored element&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;cylinder&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src\/main\/java&lt;simple{cylinder.java[cylinder" matchStrategy="1" name="Cylinder" qualified="false" references="true" similarDeclarations="false" stamp="1443035898556" textual="false" version="1.0"/>
+</session>
