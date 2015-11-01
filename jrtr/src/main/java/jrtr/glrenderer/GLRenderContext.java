@@ -48,7 +48,7 @@ public class GLRenderContext implements RenderContext {
 	 *            this object.
 	 */
 	public GLRenderContext(GLAutoDrawable drawable) {
-		
+
 		// Some OpenGL initialization
 		gl = drawable.getGL().getGL3();
 		gl.glEnable(GL3.GL_DEPTH_TEST);
@@ -80,7 +80,7 @@ public class GLRenderContext implements RenderContext {
 	 * to the rendering method.
 	 */
 	public void display(GLAutoDrawable drawable) {
-		
+
 		// Get reference to the OpenGL rendering context
 		gl = drawable.getGL().getGL3();
 
@@ -107,7 +107,7 @@ public class GLRenderContext implements RenderContext {
 	private void beginFrame() {
 		// Set the active shader as default for this frame
 		gl.glUseProgram(activeShaderID);
-		
+
 		// Clear color and depth buffer for the new frame
 		gl.glClear(GL3.GL_COLOR_BUFFER_BIT);
 		gl.glClear(GL3.GL_DEPTH_BUFFER_BIT);
@@ -129,10 +129,10 @@ public class GLRenderContext implements RenderContext {
 	 *            the object that needs to be drawn
 	 */
 	private void draw(RenderItem renderItem) {
-		
+
 		// Set the material of the shape to be rendered
 		setMaterial(renderItem.getShape().getMaterial());
-		
+
 		// Get reference to the vertex data of the render item to be rendered
 		GLVertexData vertexData = (GLVertexData) renderItem.getShape()
 				.getVertexData();
@@ -155,7 +155,7 @@ public class GLRenderContext implements RenderContext {
 		// associated with the VAO. We already loaded the vertex data into the
 		// VBOs on the GPU, so we do not have to send them again.
 		vertexData.getVAO().bind();
-		
+
 		// Try to connect the vertex buffers to the corresponding variables 
 		// in the current vertex shader.
 		// Note: This is not part of the vertex array object, because the active
@@ -181,7 +181,7 @@ public class GLRenderContext implements RenderContext {
 			switch (e.getSemantic()) {
 			case POSITION:
 				attribIndex = gl
-						.glGetAttribLocation(activeShaderID, "position");
+				.glGetAttribLocation(activeShaderID, "position");
 				break;
 			case NORMAL:
 				attribIndex = gl.glGetAttribLocation(activeShaderID, "normal");
@@ -191,7 +191,7 @@ public class GLRenderContext implements RenderContext {
 				break;
 			case TEXCOORD:
 				attribIndex = gl
-						.glGetAttribLocation(activeShaderID, "texcoord");
+				.glGetAttribLocation(activeShaderID, "texcoord");
 				break;
 			}
 
@@ -209,7 +209,7 @@ public class GLRenderContext implements RenderContext {
 
 		cleanMaterial(renderItem.getShape().getMaterial());
 	}
-	
+
 	/**
 	 * A utility method to load vertex data into an OpenGL "vertex array object"
 	 * (VAO) for efficient rendering. The VAO stores several "vertex buffer objects"
@@ -219,12 +219,12 @@ public class GLRenderContext implements RenderContext {
 	 * 			reference to the vertex data to be loaded into a VAO
 	 */
 	private void initArrayBuffer(GLVertexData data) {
-		
+
 		// Make a vertex array object (VAO) for this vertex data
 		// and store a reference to it
 		GLVertexArrayObject vao = new GLVertexArrayObject(gl, data.getElements().size() + 1);
 		data.setVAO(vao);
-		
+
 		// Bind (activate) the VAO for the vertex data in OpenGL.
 		// The subsequent OpenGL operations on VBOs will be recorded (stored)
 		// in the VAO.
@@ -262,8 +262,7 @@ public class GLRenderContext implements RenderContext {
 	private void setTransformation(Matrix4f transformation) {
 		// Compute the modelview matrix by multiplying the camera matrix and
 		// the transformation matrix of the object
-		Matrix4f modelview = new Matrix4f(sceneManager.getCamera()
-				.getCameraMatrix());
+		Matrix4f modelview = new Matrix4f(sceneManager.getCamera().getCameraMatrix());
 		modelview.mul(transformation);
 
 		// Set modelview and projection matrices in shader
@@ -272,7 +271,7 @@ public class GLRenderContext implements RenderContext {
 				transformationToFloat16(modelview), 0);
 		gl.glUniformMatrix4fv(gl.glGetUniformLocation(activeShaderID,
 				"projection"), 1, false, transformationToFloat16(sceneManager
-				.getFrustum().getProjectionMatrix()), 0);
+						.getFrustum().getProjectionMatrix()), 0);
 
 	}
 
@@ -284,16 +283,16 @@ public class GLRenderContext implements RenderContext {
 	 * 		the material to be set up for rendering
 	 */
 	private void setMaterial(Material m) {
-		
+
 		// Set up the shader for the material, if it has one
 		if(m != null && m.shader != null) {
-			
+
 			// Identifier for shader variables
 			int id;
-			
+
 			// Activate the shader
 			useShader(m.shader);
-			
+
 			// Activate the diffuse texture, if the material has one
 			if(m.diffuseMap != null) {
 				// OpenGL calls to activate the texture 
@@ -307,6 +306,27 @@ public class GLRenderContext implements RenderContext {
 				gl.glUniform1i(id, 0);	// The variable in the shader needs to be set to the desired texture unit, i.e., 0
 			}
 			
+			// => [ST]
+			id = gl.glGetUniformLocation(activeShaderID, "k_diffuse");
+			if(id!=-1)
+				gl.glUniform3f(id, m.diffuse.x, m.diffuse.y, m.diffuse.z);
+			else
+				System.out.print("Could not get location of uniform variable k_diffuse\n");
+			/*
+			id = gl.glGetUniformLocation(activeShaderID, "k_specular");
+			if(id!=-1)
+				gl.glUniform3f(id, m.specular.x, m.specular.y, m.specular.z);
+			else
+				System.out.print("Could not get location of uniform variable k_specular\n");
+			id = gl.glGetUniformLocation(activeShaderID, "k_ambient");
+			if(id!=-1)
+				gl.glUniform3f(id, m.ambient.x, m.ambient.y, m.ambient.z);
+			else
+				System.out.print("Could not get location of uniform variable k_ambient\n");
+				*/
+			// <= [ST]
+			
+
 			// Pass a default light source to shader
 			String lightString = "lightDirection[" + 0 + "]";			
 			id = gl.glGetUniformLocation(activeShaderID, lightString);
@@ -315,17 +335,17 @@ public class GLRenderContext implements RenderContext {
 			else
 				System.out.print("Could not get location of uniform variable " + lightString + "\n");
 			int nLights = 1;
-			
+
 			// Iterate over all light sources in scene manager (overwriting the default light source)
 			Iterator<Light> iter = sceneManager.lightIterator();			
-			
+
 			Light l;
 			if(iter != null) {
 				nLights = 0;
 				while(iter.hasNext() && nLights<8)
 				{
 					l = iter.next(); 
-					
+
 					// Pass light direction to shader, we assume the shader stores it in an array "lightDirection[]"
 					lightString = "lightDirection[" + nLights + "]";			
 					id = gl.glGetUniformLocation(activeShaderID, lightString);
@@ -333,17 +353,60 @@ public class GLRenderContext implements RenderContext {
 						gl.glUniform4f(id, l.direction.x, l.direction.y, l.direction.z, 0.f);		// Set light direction
 					else
 						System.out.print("Could not get location of uniform variable " + lightString + "\n");
+					// => [ST]
+					// Pass light position
+					lightString = "lightPosition[" + nLights + "]";			
+					id = gl.glGetUniformLocation(activeShaderID, lightString);
+					if(id!=-1)
+						gl.glUniform4f(id, l.position.x, l.position.y, l.position.z, 1.f);
+					else
+						System.out.print("Could not get location of uniform variable " + lightString + "\n");
+					// Pass light diffuse
+					lightString = "c_diffuse[" + nLights + "]";			
+					id = gl.glGetUniformLocation(activeShaderID, lightString);
+					if(id!=-1)
+						gl.glUniform3f(id, l.diffuse.x, l.diffuse.y, l.diffuse.z);
+					else
+						System.out.print("Could not get location of uniform variable " + lightString + "\n");
+					/*
+					// Pass light c_specular
+					lightString = "c_specular[" + nLights + "]";			
+					id = gl.glGetUniformLocation(activeShaderID, lightString);
+					if(id!=-1)
+						gl.glUniform3f(id, l.specular.x, l.specular.y, l.specular.z);
+					else
+						System.out.print("Could not get location of uniform variable " + lightString + "\n");
+					// Pass light c_ambient
+					lightString = "c_ambient[" + nLights + "]";			
+					id = gl.glGetUniformLocation(activeShaderID, lightString);
+					if(id!=-1)
+						gl.glUniform3f(id, l.ambient.x, l.ambient.y, l.ambient.z);
+					else
+						System.out.print("Could not get location of uniform variable " + lightString + "\n");
+					*/
+					// Pass light source type
+					lightString = "lightType[" + nLights + "]";			
+					id = gl.glGetUniformLocation(activeShaderID, lightString);
+					if(id!=-1)
+						switch(l.type){
+						case DIRECTIONAL: gl.glUniform1i(id, 0); break;
+						case POINT: gl.glUniform1i(id, 1); break;
+						case SPOT: gl.glUniform1i(id, 2); break;
+						}
+					else
+						System.out.print("Could not get location of uniform variable " + lightString + "\n");
+					// <= [ST]
 					
 					nLights++;
 				}
-				
+
 				// Pass number of lights to shader, we assume this is in a variable "nLights" in the shader
 				id = gl.glGetUniformLocation(activeShaderID, "nLights");
 				if(id!=-1)
 					gl.glUniform1i(id, nLights);		// Set number of lightrs
-// Only for debugging				
-//				else
-//					System.out.print("Could not get location of uniform variable nLights\n");
+				// Only for debugging				
+				//				else
+				//					System.out.print("Could not get location of uniform variable nLights\n");
 			}
 		}
 	}

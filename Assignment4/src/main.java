@@ -1,10 +1,13 @@
 
 import jrtr.*;
+import jrtr.Light.Type;
 import jrtr.glrenderer.*;
 import jrtr.gldeferredrenderer.*;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.IOException;
+
 import javax.vecmath.*;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,9 +22,12 @@ public class main
 	static RenderContext renderContext;
 	static Shader normalShader;
 	static Shader diffuseShader;
-	static Material material;
+	static Material material1;
+	static Material material2;
 	static SimpleSceneManager sceneManager;
-	static Shape shape;
+	static Shape shape1;
+	static Shape shape2;
+	static Shape shape3;
 	static float currentstep, basicstep;
 
 	/**
@@ -39,64 +45,48 @@ public class main
 		public void init(RenderContext r)
 		{
 			renderContext = r;
-			
-			// Make a simple geometric object: a cube
-			
-			// The vertex positions of the cube
-			float v[] = {-1,-1,1, 1,-1,1, 1,1,1, -1,1,1,		// front face
-				         -1,-1,-1, -1,-1,1, -1,1,1, -1,1,-1,	// left face
-					  	 1,-1,-1,-1,-1,-1, -1,1,-1, 1,1,-1,		// back face
-						 1,-1,1, 1,-1,-1, 1,1,-1, 1,1,1,		// right face
-						 1,1,1, 1,1,-1, -1,1,-1, -1,1,1,		// top face
-						-1,-1,1, -1,-1,-1, 1,-1,-1, 1,-1,1};	// bottom face
-
-			// The vertex normals 
-			float n[] = {0,0,1, 0,0,1, 0,0,1, 0,0,1,			// front face
-				         -1,0,0, -1,0,0, -1,0,0, -1,0,0,		// left face
-					  	 0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1,		// back face
-						 1,0,0, 1,0,0, 1,0,0, 1,0,0,			// right face
-						 0,1,0, 0,1,0, 0,1,0, 0,1,0,			// top face
-						 0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0};		// bottom face
-
-			// The vertex colors
-			float c[] = {1,0,0, 1,0,0, 1,0,0, 1,0,0,
-					     0,1,0, 0,1,0, 0,1,0, 0,1,0,
-						 1,0,0, 1,0,0, 1,0,0, 1,0,0,
-						 0,1,0, 0,1,0, 0,1,0, 0,1,0,
-						 0,0,1, 0,0,1, 0,0,1, 0,0,1,
-						 0,0,1, 0,0,1, 0,0,1, 0,0,1};
-
-			// Texture coordinates 
-			float uv[] = {0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1};
-
-			// Construct a data structure that stores the vertices, their
-			// attributes, and the triangle mesh connectivity
-			VertexData vertexData = renderContext.makeVertexData(24);
-			vertexData.addElement(c, VertexData.Semantic.COLOR, 3);
-			vertexData.addElement(v, VertexData.Semantic.POSITION, 3);
-			vertexData.addElement(n, VertexData.Semantic.NORMAL, 3);
-			vertexData.addElement(uv, VertexData.Semantic.TEXCOORD, 2);
-			
-			// The triangles (three vertex indices for each triangle)
-			int indices[] = {0,2,3, 0,1,2,			// front face
-							 4,6,7, 4,5,6,			// left face
-							 8,10,11, 8,9,10,		// back face
-							 12,14,15, 12,13,14,	// right face
-							 16,18,19, 16,17,18,	// top face
-							 20,22,23, 20,21,22};	// bottom face
-
-			vertexData.addIndices(indices);
-								
+					
 			// Make a scene manager and add the object
 			sceneManager = new SimpleSceneManager();
-			shape = new Shape(vertexData);
-			sceneManager.addShape(shape);
-
+			
+			shape1 = new Cube(renderContext, 2, 2, 2);
+			sceneManager.addShape(shape1);
+						
+			VertexData vertexData;
+			ObjReader objReader = new ObjReader();
+			try {
+				vertexData = objReader.read("/Users/Severin/Uni Bern/3. Semester/Computer Graphics/Eclipse Workspace/obj/Teapot.obj", 2f, renderContext);
+				shape2 = new Shape(vertexData);
+				sceneManager.addShape(shape2);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			
+			shape3 = new Cylinder(renderContext,20,2,6);
+			sceneManager.addShape(shape3);
+			
+			
+			// add light sources, in camera coordinates!! [ST]
+			Light l = new Light();
+			
+			l.diffuse = new Vector3f(0f,0f,1f);
+			l.direction = new Vector3f(0f,-1f,0f);
+			sceneManager.addLight(l);
+			l = new Light();
+			l.diffuse = new Vector3f(1f,0f,0f);
+			l.direction = new Vector3f(0f,1f,0f);
+			sceneManager.addLight(l);
+			l = new Light();
+			l.diffuse = new Vector3f(1f,1f,1f);
+			l.position = new Vector3f(0f,0f,-8.5f);
+			l.type = Type.POINT;
+			sceneManager.addLight(l);
+			l = new Light();
+			l.diffuse = new Vector3f(1f,1f,1f);
+			l.direction = new Vector3f(0f,1f,0f);
+			sceneManager.addLight(l);
+			
+			
 			// Add the scene to the renderer
 			renderContext.setSceneManager(sceneManager);
 			
@@ -118,15 +108,26 @@ public class main
 		    }
 
 		    // Make a material that can be used for shading
-			material = new Material();
-			material.shader = diffuseShader;
-			material.diffuseMap = renderContext.makeTexture();
+			material1 = new Material();
+			material1.shader = diffuseShader;
+			material1.diffuseMap = renderContext.makeTexture();
 			try {
-				material.diffuseMap.load("../textures/plant.jpg");
+				material1.diffuseMap.load("../textures/plant.jpg");
 			} catch(Exception e) {				
 				System.out.print("Could not load texture.\n");
 				System.out.print(e.getMessage());
 			}
+			
+			material2 = new Material();
+			material2.shader = diffuseShader;
+			material2.diffuseMap = renderContext.makeTexture();
+			try {
+				material2.diffuseMap.load("../textures/plant.jpg");
+			} catch(Exception e) {				
+				System.out.print("Could not load texture.\n");
+				System.out.print(e.getMessage());
+			}
+			
 
 			// Register a timer task
 		    Timer timer = new Timer();
@@ -136,6 +137,8 @@ public class main
 		}
 	}
 
+	
+	
 	/**
 	 * A timer task that generates an animation. This task triggers
 	 * the redrawing of the 3D scene every time it is executed.
@@ -145,14 +148,23 @@ public class main
 		public void run()
 		{
 			// Update transformation by rotating with angle "currentstep"
-    		Matrix4f t = shape.getTransformation();
+    		Matrix4f t = shape1.getTransformation();
     		Matrix4f rotX = new Matrix4f();
     		rotX.rotX(currentstep);
     		Matrix4f rotY = new Matrix4f();
     		rotY.rotY(currentstep);
     		t.mul(rotX);
     		t.mul(rotY);
-    		shape.setTransformation(t);
+    		shape1.setTransformation(t);
+    		
+    		t = new Matrix4f(shape2.getTransformation());
+    		t.setTranslation(new Vector3f(3,3,0));
+    		shape2.setTransformation(t);
+    		
+
+    		t = new Matrix4f(shape3.getTransformation());
+    		t.setTranslation(new Vector3f(-3,-3,-2));
+    		shape3.setTransformation(t);
     		
     		// Trigger redrawing of the render window
     		renderPanel.getCanvas().repaint(); 
@@ -211,23 +223,23 @@ public class main
 				}
 				case 'n': {
 					// Remove material from shape, and set "normal" shader
-					shape.setMaterial(null);
+					shape1.setMaterial(null);
 					renderContext.useShader(normalShader);
 					break;
 				}
 				case 'd': {
 					// Remove material from shape, and set "default" shader
-					shape.setMaterial(null);
+					shape1.setMaterial(null);
 					renderContext.useDefaultShader();
 					break;
 				}
 				case 'm': {
 					// Set a material for more complex shading of the shape
-					if(shape.getMaterial() == null) {
-						shape.setMaterial(material);
+					if(shape1.getMaterial() == null) {
+						shape1.setMaterial(material1);
 					} else
 					{
-						shape.setMaterial(null);
+						shape1.setMaterial(null);
 						renderContext.useDefaultShader();
 					}
 					break;
