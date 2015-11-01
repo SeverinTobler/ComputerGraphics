@@ -55,14 +55,14 @@ public class main
 			VertexData vertexData;
 			ObjReader objReader = new ObjReader();
 			try {
-				vertexData = objReader.read("/Users/Severin/Uni Bern/3. Semester/Computer Graphics/Eclipse Workspace/obj/Teapot.obj", 2f, renderContext);
+				vertexData = objReader.read("../obj/Teapot.obj", 2f, renderContext);
 				shape2 = new Shape(vertexData);
 				sceneManager.addShape(shape2);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
 			
-			shape3 = new Cylinder(renderContext,20,2,6);
+			shape3 = new Cylinder(renderContext,20,1,2);
 			sceneManager.addShape(shape3);
 			
 			
@@ -83,7 +83,13 @@ public class main
 			sceneManager.addLight(l);
 			l = new Light();
 			l.diffuse = new Vector3f(1f,1f,1f);
-			l.direction = new Vector3f(0f,1f,0f);
+			l.position = new Vector3f(-3f,-3f,-9f);
+			l.type = Type.POINT;
+			sceneManager.addLight(l);
+			l = new Light();
+			l.diffuse = new Vector3f(0f,1f,0f);
+			l.position = new Vector3f(3f,3f,-8f);
+			l.type = Type.POINT;
 			sceneManager.addLight(l);
 			
 			
@@ -120,15 +126,15 @@ public class main
 			
 			material2 = new Material();
 			material2.shader = diffuseShader;
+			material2.diffuse = new Vector3f(0.5f, 1f, 1f);
 			material2.diffuseMap = renderContext.makeTexture();
 			try {
-				material2.diffuseMap.load("../textures/plant.jpg");
+				material2.diffuseMap.load("../textures/wood.jpg");
 			} catch(Exception e) {				
 				System.out.print("Could not load texture.\n");
 				System.out.print(e.getMessage());
 			}
 			
-
 			// Register a timer task
 		    Timer timer = new Timer();
 		    basicstep = 0.01f;
@@ -165,7 +171,7 @@ public class main
     		t = new Matrix4f(shape3.getTransformation());
     		t.setTranslation(new Vector3f(-3,-3,-2));
     		shape3.setTransformation(t);
-    		
+			
     		// Trigger redrawing of the render window
     		renderPanel.getCanvas().repaint(); 
 		}
@@ -221,6 +227,7 @@ public class main
 					currentstep -= basicstep;
 					break;
 				}
+				/*
 				case 'n': {
 					// Remove material from shape, and set "normal" shader
 					shape1.setMaterial(null);
@@ -233,13 +240,18 @@ public class main
 					renderContext.useDefaultShader();
 					break;
 				}
+				*/
 				case 'm': {
 					// Set a material for more complex shading of the shape
 					if(shape1.getMaterial() == null) {
 						shape1.setMaterial(material1);
+						shape2.setMaterial(material1);
+						shape3.setMaterial(material2);
 					} else
 					{
 						shape1.setMaterial(null);
+						shape2.setMaterial(null);
+						shape2.setMaterial(null);
 						renderContext.useDefaultShader();
 					}
 					break;
