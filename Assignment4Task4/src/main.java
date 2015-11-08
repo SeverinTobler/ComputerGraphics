@@ -20,10 +20,10 @@ public class main
 {	
 	static RenderPanel renderPanel;
 	static RenderContext renderContext;
-	static Shader normalShader;
-	static Shader diffuseShader;
+	static Shader goochShader;
 	static Material material1;
 	static Material material2;
+	static Material material3;
 	static SimpleSceneManager sceneManager;
 	static Shape shape1;
 	static Shape shape2;
@@ -71,29 +71,18 @@ public class main
 				e1.printStackTrace();
 			}
 			
-			// add light sources, in camera coordinates!! [ST]
+			// add light sources, in world coordinates!! [ST]
+			// x points right, y points up, z points outside
 			Light l = new Light();
 			
-			l.diffuse = new Vector3f(0f,0f,1f);
-			l.direction = new Vector3f(0f,-1f,0f);
-			//sceneManager.addLight(l);
-			l = new Light();
-			l.diffuse = new Vector3f(1f,0f,0f);
-			l.direction = new Vector3f(0f,1f,0f);
-			//sceneManager.addLight(l);
 			l = new Light();
 			l.diffuse = new Vector3f(1f,1f,1f);
-			l.position = new Vector3f(0f,0f,-8.5f);
+			l.position = new Vector3f(0f,0f,2f);
 			l.type = Type.POINT;
 			sceneManager.addLight(l);
 			l = new Light();
 			l.diffuse = new Vector3f(1f,1f,1f);
-			l.position = new Vector3f(-3f,-3f,-11f);
-			l.type = Type.POINT;
-			sceneManager.addLight(l);
-			l = new Light();
-			l.diffuse = new Vector3f(0f,1f,0f);
-			l.position = new Vector3f(3f,3f,-9f);
+			l.position = new Vector3f(-3f,-3f,-1f);
 			l.type = Type.POINT;
 			sceneManager.addLight(l);
 			
@@ -102,17 +91,9 @@ public class main
 			renderContext.setSceneManager(sceneManager);
 			
 			// Load some more shaders
-		    normalShader = renderContext.makeShader();
+		    goochShader = renderContext.makeShader();
 		    try {
-		    	normalShader.load("../jrtr/shaders/normal.vert", "../jrtr/shaders/normal.frag");
-		    } catch(Exception e) {
-		    	System.out.print("Problem with shader:\n");
-		    	System.out.print(e.getMessage());
-		    }
-	
-		    diffuseShader = renderContext.makeShader();
-		    try {
-		    	diffuseShader.load("../jrtr/shaders/diffuse.vert", "../jrtr/shaders/diffuse.frag");
+		    	goochShader.load("../jrtr/shaders/hatch.vert", "../jrtr/shaders/hatch.frag");
 		    } catch(Exception e) {
 		    	System.out.print("Problem with shader:\n");
 		    	System.out.print(e.getMessage());
@@ -120,7 +101,9 @@ public class main
 
 		    // Make a material that can be used for shading
 			material1 = new Material();
-			material1.shader = diffuseShader;
+			material1.specular = new Vector3f(0.2f, 0.2f, 0.2f);
+			material1.shininess = 0.5f;
+			material1.shader = goochShader;
 			material1.diffuseMap = renderContext.makeTexture();
 			try {
 				material1.diffuseMap.load("../textures/plant.jpg");
@@ -130,11 +113,26 @@ public class main
 			}
 			
 			material2 = new Material();
-			material2.shader = diffuseShader;
-			material2.diffuse = new Vector3f(0.5f, 1f, 1f);
+			material2.shader = goochShader;
+			material2.diffuse = new Vector3f(0.5f, 0.5f, 0.5f);
+			material2.specular = new Vector3f(0.5f, 0.5f, 0.5f);
+			material2.shininess = 0.5f;
 			material2.diffuseMap = renderContext.makeTexture();
 			try {
 				material2.diffuseMap.load("../textures/wood.jpg");
+			} catch(Exception e) {				
+				System.out.print("Could not load texture.\n");
+				System.out.print(e.getMessage());
+			}
+
+			material3 = new Material();
+			material3.shader = goochShader;
+			material3.diffuse = new Vector3f(0.5f, 0.5f, 0.5f);
+			material3.specular = new Vector3f(0.5f, 0.5f, 0.5f);
+			material3.shininess = 1f;
+			material3.diffuseMap = renderContext.makeTexture();
+			try {
+				material3.diffuseMap.load("../textures/wood.jpg");
 			} catch(Exception e) {				
 				System.out.print("Could not load texture.\n");
 				System.out.print(e.getMessage());
@@ -245,12 +243,12 @@ public class main
 					if(shape1.getMaterial() == null) {
 						shape1.setMaterial(material1);
 						shape2.setMaterial(material2);
-						shape3.setMaterial(material2);
+						shape3.setMaterial(material3);
 					} else
 					{
 						shape1.setMaterial(null);
 						shape2.setMaterial(null);
-						shape2.setMaterial(null);
+						shape3.setMaterial(null);
 						renderContext.useDefaultShader();
 					}
 					break;

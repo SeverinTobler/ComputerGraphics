@@ -9,9 +9,13 @@ uniform sampler2D myTexture;
 uniform vec4 lightDirection[MAX_LIGHTS];
 uniform vec4 lightPosition[MAX_LIGHTS];
 uniform vec3 c_diffuse[MAX_LIGHTS];
+//uniform vec3 c_specular[MAX_LIGHTS];
+//uniform vec3 c_ambient[MAX_LIGHTS];
 uniform int lightType[MAX_LIGHTS];
 uniform int nLights;
 uniform vec3 k_diffuse;
+//uniform vec3 k_specular;
+//uniform vec3 k_ambient;
 
 // Variables passed in from the vertex shader
 in float direct;
@@ -40,12 +44,12 @@ void main()
 		// point light source:
 		if(lightType[i]==1){
 			L = lightPosition[i]-frag_position;
-			r = length(L);	// distance to light source
+			r = sqrt(L.x*L.x + L.y*L.y + L.z*L.z);	// distance to light source
 			L = L/r;
 			c_d = c_diffuse[i]/(r*r);		
 		}
 		
-		c = c + c_d*k_diffuse*(max(dot(L,frag_normal),0));
+		c = c + c_d*k_diffuse*(dot(L,frag_normal));
 	}
  
 	// The built-in GLSL function "texture" performs the texture lookup
