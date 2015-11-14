@@ -36,6 +36,16 @@ public class main
 	static boolean rollN;
 	static boolean pitchP;
 	static boolean pitchN;
+	static TransformGroup robot;
+	static TransformGroup leftLeg;
+	static TransformGroup rightLeg;
+	static TransformGroup lowerLeftLeg;
+	static TransformGroup lowerRightLeg;
+	static TransformGroup leftArm;
+	static TransformGroup rightArm;
+	static TransformGroup lowerLeftArm;
+	static TransformGroup lowerRightArm;
+	static TransformGroup head;
 
 	/**
 	 * An extension of {@link GLRenderPanel} or {@link SWRenderPanel} to 
@@ -62,14 +72,15 @@ public class main
 			// floor
 			Matrix4f T = new Matrix4f();
 			T.rotX(1);
-			T = new Matrix4f(1,0,0,0, 0,1,0,0, 0,0,1,-0.5f, 0,0,0,1);
+			T = new Matrix4f(1,0,0,-5, 0,0,1,0, 0,-1,0,0, 0,0,0,1);
 			TransformGroup floorT = new TransformGroup(T);
 
-			shape = new Cube(renderContext, 10, 10, 1);
+			shape = new Cube(renderContext, 20, 20, 0.2f);
+			shape.setTransformation(new Matrix4f(1,0,0,0, 0,1,0,0, 0,0,1,-0.1f, 0,0,0,1));
 			ShapeNode floor = new ShapeNode(shape);
 			floorT.addChild(floor);
 
-			//sceneGraph.addChild(floorT);
+			sceneGraph.addChild(floorT);
 
 			// robot
 			shape = new Cube(renderContext, 2,2,2);
@@ -84,10 +95,10 @@ public class main
 			
 			
 			T = new Matrix4f(1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1);
-			TransformGroup robot = new TransformGroup(T);
+			robot = new TransformGroup(T);
 			
 			T = new Matrix4f(1,0,0,0, 0,1,0,0, 0,0,1,4.2f, 0,0,0,1);
-			TransformGroup head = new TransformGroup(T);
+			head = new TransformGroup(T);
 			head.addChild(skull);
 			
 			T = new Matrix4f(1,0,0,0, 0,1,0,0, 0,0,1,4.2f, 0,0,0,1);
@@ -95,35 +106,35 @@ public class main
 			torso.addChild(chest);
 			
 			T = new Matrix4f(1,0,0,0.5f, 0,1,0,0f, 0,0,1,2.2f, 0,0,0,1);
-			TransformGroup leftLeg = new TransformGroup(T);
+			leftLeg = new TransformGroup(T);
 			leftLeg.addChild(limb);
 			
 			T = new Matrix4f(1,0,0,0, 0,1,0,0f, 0,0,1,-1.1f, 0,0,0,1);
-			TransformGroup lowerLeftLeg = new TransformGroup(T);
+			lowerLeftLeg = new TransformGroup(T);
 			lowerLeftLeg.addChild(limb);
 			
 			T = new Matrix4f(1,0,0,-0.5f, 0,1,0,0f, 0,0,1,2.2f, 0,0,0,1);
-			TransformGroup rightLeg = new TransformGroup(T);
+			rightLeg = new TransformGroup(T);
 			rightLeg.addChild(limb);
 			
 			T = new Matrix4f(1,0,0,0, 0,1,0,0f, 0,0,1,-1.1f, 0,0,0,1);
-			TransformGroup lowerRightLeg = new TransformGroup(T);
+			lowerRightLeg = new TransformGroup(T);
 			lowerRightLeg.addChild(limb);
 			
 			T = new Matrix4f(1,0,0,1.5f, 0,1,0,0f, 0,0,1,4.2f, 0,0,0,1);
-			TransformGroup leftArm = new TransformGroup(T);
+			leftArm = new TransformGroup(T);
 			leftArm.addChild(limb);
 			
 			T = new Matrix4f(1,0,0,0, 0,1,0,0f, 0,0,1,-1.1f, 0,0,0,1);
-			TransformGroup lowerLeftArm = new TransformGroup(T);
+			lowerLeftArm = new TransformGroup(T);
 			lowerLeftArm.addChild(limb);
 			
 			T = new Matrix4f(1,0,0,-1.5f, 0,1,0,0f, 0,0,1,4.2f, 0,0,0,1);
-			TransformGroup rightArm = new TransformGroup(T);
+			rightArm = new TransformGroup(T);
 			rightArm.addChild(limb);
 			
 			T = new Matrix4f(1,0,0,0, 0,1,0,0f, 0,0,1,-1.1f, 0,0,0,1);
-			TransformGroup lowerRightArm = new TransformGroup(T);			
+			lowerRightArm = new TransformGroup(T);			
 			lowerRightArm.addChild(limb);
 			
 			
@@ -187,13 +198,57 @@ public class main
 	 */
 	public static class AnimationTask extends TimerTask
 	{
+		private float alpha=0;
 		public void run()
 		{
+			Matrix4f rotY = new Matrix4f();
+			rotY.rotZ(currentstep);
+			Matrix4f forward = new Matrix4f();
+			forward.setIdentity();
+			forward.setTranslation(new Vector3f(0, currentstep*4, 0));
 			
+			Matrix4f t = robot.getTransformation();
+			t.mul(rotY);
+			t.mul(forward);
 			
+			alpha = alpha - 4*currentstep;
+			// legs
+			Matrix3f rotX = new Matrix3f();
+			rotX.rotX((float)Math.sin(alpha));
+			t = leftLeg.getTransformation();
+			t.setRotation(rotX);
+			rotX.rotX(-(float)Math.abs(Math.sin(alpha)));
+			t = lowerLeftLeg.getTransformation();
+			t.setRotation(rotX);
 			
+			rotX.rotX(-(float)Math.sin(alpha));
+			t = rightLeg.getTransformation();
+			t.setRotation(rotX);
+			rotX.rotX(-(float)Math.abs(Math.sin(alpha)));
+			t = lowerRightLeg.getTransformation();
+			t.setRotation(rotX);
 			
+			// arms
+			rotX.rotX(-(float)Math.sin(alpha));
+			t = leftArm.getTransformation();
+			t.setRotation(rotX);
+			rotX.rotX(-(float)Math.sin(alpha));
+			t = lowerLeftArm.getTransformation();
+			t.setRotation(rotX);
+
+			rotX.rotX((float)Math.sin(alpha));
+			t = rightArm.getTransformation();
+			t.setRotation(rotX);
+			rotX.rotX((float)Math.sin(alpha));
+			t = lowerRightArm.getTransformation();
+			t.setRotation(rotX);
 			
+			// head
+			rotX.rotX(-(float)Math.abs(Math.sin(alpha))/2);
+			t = head.getTransformation();
+			t.setRotation(rotX);
+			
+			// camera
 			camera();
 			// Trigger redrawing of the render window
 			renderPanel.getCanvas().repaint(); 

@@ -62,7 +62,7 @@ public class GraphSceneManager implements SceneManagerInterface {
 		
 		public boolean hasNext()
 		{
-			return !shapeStack.isEmpty() && !TStack.isEmpty();
+			return !shapeStack.isEmpty();
 		}
 		
 		public RenderItem next()
