@@ -24,8 +24,8 @@ public class ShapeNode extends Leaf {
 	@Override
 	public void push(Stack<Shape> shapeStack, Stack<Matrix4f> TStack, Matrix4f Tabove) {
 		shapeStack.push(shape);
-		Matrix4f T = new Matrix4f(shape.getTransformation());
-		T.mul(Tabove);
+		Matrix4f T = new Matrix4f(Tabove);
+		T.mul(shape.getTransformation());
 		TStack.push(T);
 	}
 

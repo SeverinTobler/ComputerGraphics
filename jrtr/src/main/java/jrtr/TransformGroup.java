@@ -45,8 +45,8 @@ public class TransformGroup extends Group{
 
 	@Override
 	public void push(Stack<Shape> shapeStack, Stack<Matrix4f> TStack, Matrix4f Tabove) {
-		Matrix4f T = new Matrix4f(this.T);
-		T.mul(Tabove);
+		Matrix4f T = new Matrix4f(Tabove);
+		T.mul(this.T);
 		
 		ListIterator<Node> itr = children.listIterator(0);;
 		while(itr.hasNext()){
