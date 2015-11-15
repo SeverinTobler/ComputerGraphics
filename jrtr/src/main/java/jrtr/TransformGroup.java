@@ -50,7 +50,17 @@ public class TransformGroup extends Group{
 		
 		ListIterator<Node> itr = children.listIterator(0);;
 		while(itr.hasNext()){
-			itr.next().push(shapeStack, TStack, T);
+			Node n = itr.next();
+			if(n instanceof Group){
+				((Group) n).push(shapeStack, TStack, T);
+				continue;
+			}
+			if(n instanceof ShapeNode){
+				shapeStack.push(n.getShape());
+				Matrix4f Ttemp = new Matrix4f(T);
+				Ttemp.mul(n.getTransformation());
+				TStack.push(Ttemp);
+			}
 		}
 	}
 
