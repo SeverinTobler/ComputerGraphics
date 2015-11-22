@@ -77,8 +77,8 @@ public class main
 			T = new Matrix4f(1,0,0,-5, 0,0,1,0, 0,-1,0,0, 0,0,0,1);
 			TransformGroup grid = new TransformGroup(T);
 
-			for(int i=0; i<100; i++){
-				for(int j=0; j<100 ; j++){
+			for(int i=0; i<300; i++){
+				for(int j=0; j<300 ; j++){
 					T = new Matrix4f(1,0,0,4*i, 0,0,-1,4*j, 0,1,0,0, 0,0,0,1);
 					TransformGroup element = new TransformGroup(T);
 					element.addChild(pod);
@@ -135,14 +135,23 @@ public class main
 	 */
 	public static class AnimationTask extends TimerTask
 	{
-		
+		long lastLoopTime = System.currentTimeMillis();
+		int counter = 1;
+		int update = 100;
 		public void run()
 		{
 			
 			// camera
 			camera();
 			// Trigger redrawing of the render window
-			renderPanel.getCanvas().repaint(); 
+			renderPanel.getCanvas().repaint();
+            counter++;
+            if(counter>=update){
+    			double delta = (double) (System.currentTimeMillis() - lastLoopTime);
+                lastLoopTime = System.currentTimeMillis();
+            	System.out.println(update/delta*1000);
+            	counter = 1;
+            }
 		}
 
 		private void camera(){
@@ -282,6 +291,10 @@ public class main
 					// Remove material from shape, and set "default" shader
 					shape.setMaterial(null);
 					renderContext.useDefaultShader();
+					break;
+				}
+				case (char) KeyEvent.VK_C: {
+					sceneManager.setCulling(!sceneManager.getCulling());
 					break;
 				}
 				}

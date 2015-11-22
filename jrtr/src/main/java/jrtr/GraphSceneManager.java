@@ -1,6 +1,5 @@
 package jrtr;
 
-import java.util.LinkedList;
 import java.util.Stack;
 import javax.vecmath.Matrix4f;
 
@@ -10,22 +9,25 @@ public class GraphSceneManager implements SceneManagerInterface {
 	private TransformGroup sceneGraph;
 	private Camera camera;
 	private Frustum frustum;
-	private LinkedList<Light> lights;	// delete this
+	private boolean culling;
 
 	public GraphSceneManager()
 	{
 		sceneGraph = new TransformGroup();
 		camera = new Camera();
 		frustum = new Frustum();
-		lights = new LinkedList<Light>();	// delete this
-	}
-	
-	public void addLight(Light light) {		// delete this
-		lights.add(light);
+		culling = true;
 	}
 	
 	public TransformGroup getSceneGraph() {
 		return sceneGraph;
+	}
+	
+	public void setCulling(boolean culling){
+		this.culling = culling;
+	}
+	public boolean getCulling(){
+		return culling;
 	}
 	
 	@Override
@@ -35,7 +37,7 @@ public class GraphSceneManager implements SceneManagerInterface {
 
 	@Override
 	public Iterator<Light> lightIterator() {
-		return lights.iterator();		// change this
+		return new LightItr(this);
 	}
 
 	@Override
@@ -48,31 +50,48 @@ public class GraphSceneManager implements SceneManagerInterface {
 		return frustum;
 	}
 	
+	private class LightItr implements Iterator {
+		
+		public LightItr(GraphSceneManager sceneManager){
+			lightStack = new Stack<Light>();
+			Matrix4f identity = new Matrix4f();
+			identity.setIdentity();
+			sceneManager.sceneGraph.initLightItr(lightStack, identity);
+		}
+
+		@Override
+		public boolean hasNext() {
+			return !lightStack.isEmpty();
+		}
+
+		@Override
+		public Object next() {
+			return lightStack.pop();
+		}
+		private Stack<Light> lightStack;
+	}
+	
 	private class GraphSceneManagerItr implements SceneManagerIterator {
 		
 		public GraphSceneManagerItr(GraphSceneManager sceneManager)
 		{
-			TStack = new Stack<Matrix4f>();
-			shapeStack = new Stack<Shape>();
+			renderItems = new Stack<RenderItem>();
 			Matrix4f identity = new Matrix4f();
 			identity.setIdentity();
-			sceneManager.sceneGraph.push(shapeStack, TStack, identity);
+			sceneManager.sceneGraph.initRenderItr(renderItems, identity, sceneManager, culling);
 		}
 		
 		public boolean hasNext()
 		{
-			return !shapeStack.isEmpty();
+			return !renderItems.isEmpty();
 		}
 		
 		public RenderItem next()
 		{
-			Shape shape = shapeStack.pop();
-			Matrix4f T = TStack.pop();
-			return new RenderItem(shape, T);
+			return renderItems.pop();
 		}
 		
-		private Stack<Matrix4f> TStack;
-		private Stack<Shape> shapeStack;
+		private Stack<RenderItem> renderItems;
 	}
 
 }

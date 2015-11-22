@@ -10,8 +10,10 @@ uniform vec4 lightDirection[MAX_LIGHTS];
 uniform vec4 lightPosition[MAX_LIGHTS];
 uniform vec3 c_diffuse[MAX_LIGHTS];
 uniform vec3 c_specular[MAX_LIGHTS];
+uniform vec3 c_ambient[MAX_LIGHTS];
 uniform int lightType[MAX_LIGHTS];
 uniform int nLights;
+uniform vec3 k_ambient;
 uniform vec3 k_diffuse;
 uniform vec3 k_specular;
 uniform vec4 camera;
@@ -53,7 +55,7 @@ void main()
 		
 		vec4 R = reflect(L, frag_normal);
 		vec4 e = camera - frag_position;
-		c = c + c_d*k_diffuse*(dot(L,frag_normal)) + c_s*k_specular*(pow(max(dot(R,e),0), phong_exponent));
+		c = c + c_d*k_diffuse*(dot(L,frag_normal)) + c_s*k_specular*(pow(max(dot(R,e),0), phong_exponent)) + c_ambient[i]*k_ambient;
 	}
  
 	// The built-in GLSL function "texture" performs the texture lookup

@@ -1,6 +1,10 @@
 package jrtr;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+
 import javax.vecmath.Matrix4f;
+import javax.vecmath.Vector4f;
 
 /**
  * Stores the specification of a viewing frustum, or a viewing
@@ -30,11 +34,59 @@ public class Frustum {
 				     0.f, 0.f, -1.f, 0.f};
 		projectionMatrix.set(f);
 		*/
+
 		setNear(1f);
 		setFar(100.5f);
 		setAspect(1f);
 		setFov(0.9273f);
 	}
+	
+	public Plain[] getBoundaryPlains(){
+		Plain[] boundary = new Plain[6];
+		
+		Matrix4f inv = new Matrix4f(projectionMatrix);
+		
+		try{
+			inv.invert();
+		} catch(Exception e){
+			System.err.println("Could not invert matrix!");
+		}
+		
+		Vector4f p0 = new Vector4f(-1,-1,-1,1);
+		inv.transform(p0);
+		p0.scale(1/p0.w);
+		Vector4f p1 = new Vector4f(1,-1,-1,1);
+		inv.transform(p1);
+		p1.scale(1/p1.w);
+		Vector4f p2 = new Vector4f(1,-1,1,1);
+		inv.transform(p2);
+		p2.scale(1/p2.w);
+		Vector4f p3 = new Vector4f(-1,-1,1,1);
+		inv.transform(p3);
+		p3.scale(1/p3.w);
+		Vector4f p4 = new Vector4f(-1,1,-1,1);
+		inv.transform(p4);
+		p4.scale(1/p4.w);
+		Vector4f p5 = new Vector4f(1,1,-1,1);
+		inv.transform(p5);
+		p5.scale(1/p5.w);
+		Vector4f p6 = new Vector4f(1,1,1,1);
+		inv.transform(p6);
+		p6.scale(1/p6.w);
+		Vector4f p7 = new Vector4f(-1,1,1,1);
+		inv.transform(p7);
+		p7.scale(1/p7.w);
+		
+		boundary[0] = new Plain(p0,p1,p5);
+		boundary[1] = new Plain(p1,p2,p5);
+		boundary[2] = new Plain(p7,p6,p3);
+		boundary[3] = new Plain(p4,p7,p3);
+		boundary[4] = new Plain(p5,p6,p4);
+		boundary[5] = new Plain(p1,p0,p2);
+		
+		return boundary;
+	}
+	
 	public void setNear(float near){
 		this.near = near;
 		update();

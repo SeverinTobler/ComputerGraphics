@@ -25,6 +25,21 @@ public class Light {
 		spotExponent = 0.f;
 		spotCutoff = 180.f;
 	}
+	
+	public Light(Light other)
+	{
+		// Copy a Light object
+		direction = new Vector3f(other.direction);
+		position = new Vector3f(other.position);
+		type = other.type;
+		diffuse = new Vector3f(other.diffuse);
+		ambient = new Vector3f(other.ambient);
+		specular = new Vector3f(other.specular);
+		attenuation = new Vector3f(other.attenuation);
+		spotDirection = new Vector3f(other.spotDirection);
+		spotExponent = other.spotExponent;
+		spotCutoff = other.spotCutoff;
+	}
 
 	public Vector3f direction;
 	public Vector3f position;

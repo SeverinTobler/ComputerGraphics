@@ -11,13 +11,19 @@ public class LightNode extends Leaf {
 
 	@Override
 	public Matrix4f getTransformation() {
-		// TODO Auto-generated method stub
-		return null;
+		Matrix4f T = new Matrix4f();
+		T.setIdentity();
+		T.setTranslation(light.position);
+		return T;
 	}
 
 	@Override
 	public Shape getShape() {
 		return null;
+	}
+	
+	public Light getLight() {
+		return light;
 	}
 
 }
