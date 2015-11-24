@@ -139,18 +139,18 @@ public class main
 		int counter = 1;
 		int update = 100;
 		public void run()
-		{
-			
+		{	
 			// camera
 			camera();
 			// Trigger redrawing of the render window
 			renderPanel.getCanvas().repaint();
+			// calculate and display fps
             counter++;
             if(counter>=update){
     			double delta = (double) (System.currentTimeMillis() - lastLoopTime);
-                lastLoopTime = System.currentTimeMillis();
             	System.out.println(update/delta*1000);
             	counter = 1;
+                lastLoopTime = System.currentTimeMillis();
             }
 		}
 
