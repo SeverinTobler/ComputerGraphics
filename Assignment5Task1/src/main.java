@@ -200,7 +200,7 @@ public class main
 			l.type = Type.POINT;
 			LightNode torch = new LightNode(l);
 			
-			T = new Matrix4f(1,0,0,0, 0,1,0,0f, 0,0,1,-1.2f, 0,0,0,1);
+			T = new Matrix4f(1,0,0,0, 0,1,0,0f, 0,0,1,-1.5f, 0,0,0,1);
 			TransformGroup hand = new TransformGroup(T);
 			hand.addChild(torch);
 			lowerRightArm.addChild(hand);
