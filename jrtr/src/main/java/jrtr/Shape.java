@@ -75,7 +75,11 @@ public class Shape {
 				radius = v.length();
 		}
 	}
-	
+
+	public void setVertexData(VertexData vertexData)
+	{
+		this.vertexData = vertexData;
+	}
 	public VertexData getVertexData()
 	{
 		return vertexData;
