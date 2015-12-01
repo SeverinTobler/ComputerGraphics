@@ -51,7 +51,7 @@ public class main
 			VertexData vertexData = renderContext.makeVertexData(data.v.length/3);
 			vertexData.addElement(data.c, VertexData.Semantic.COLOR, 3);
 			vertexData.addElement(data.v, VertexData.Semantic.POSITION, 3);
-			//vertexData.addElement(data.n, VertexData.Semantic.NORMAL, 3);
+			vertexData.addElement(data.n, VertexData.Semantic.NORMAL, 3);
 			vertexData.addElement(data.uv, VertexData.Semantic.TEXCOORD, 2);
 			vertexData.addIndices(data.indices);
 			

@@ -26,26 +26,37 @@ public class Bezier {
 	}
 	
 	public BezierOut getShapeData(int numPoints, int numRotStep){
-		int N = C.length;
-		
+		float eps = 0.001f;
 		Vector4f[] points  = new Vector4f[numPoints];
+		Vector4f[] normals  = new Vector4f[numPoints];
 		for(int i=0; i<numPoints; i++){
-			float u = (float)(N*i)/(numPoints-1);
-			float t = u-((int)u);
-			if(u == N){
-				u = u-1;
-				t = 1;
+			// points
+			float u = (float)(C.length*i)/(numPoints-1);
+			points[i] = interpolate(u);
+			
+			// normals
+			normals[i] = new Vector4f();
+			if(i != numPoints-1){
+				Vector4f point = interpolate(u+eps);	// forward interpolation
+				normals[i].sub(point, points[i]);
+			}else{
+				Vector4f point = interpolate(u-eps);	// backward interpolation for last point
+				normals[i].sub(points[i], point);
 			}
-			points[i]  = new Vector4f(t*t*t, t*t, t, 1);
-			C[(int)u].transform(points[i]);
-			points[i].w = 1;
+			// compute normalized normal from tangent
+			float temp = normals[i].x;
+			normals[i].x = normals[i].y;
+			normals[i].y = -temp;
+			normals[i].scale(1/normals[i].length());
+			
 		}
 		
 		
 		
 		numRotStep = numRotStep+1;
-		float[] color = new float[3*numPoints*numRotStep];
-		float[] vertex = new float[3*numPoints*numRotStep];
+		float[] c = new float[3*numPoints*numRotStep];
+		float[] n = new float[3*numPoints*numRotStep];
+		float[] v = new float[3*numPoints*numRotStep];
 		for(int i=0; i<numRotStep; i++){
 			float angle = (float)(2*Math.PI*i/(numRotStep-1));
 			Matrix4f rotY = new Matrix4f();
@@ -53,11 +64,17 @@ public class Bezier {
 			for(int j=0; j<numPoints; j++){
 				Vector4f point = new Vector4f(points[j]);
 				rotY.transform(point);
-				vertex[(i*numPoints+j)*3] = point.x;
-				vertex[(i*numPoints+j)*3+1] = point.y;
-				vertex[(i*numPoints+j)*3+2] = point.z;
+				v[(i*numPoints+j)*3] = point.x;
+				v[(i*numPoints+j)*3+1] = point.y;
+				v[(i*numPoints+j)*3+2] = point.z;
 				
-				color[(i*numPoints+j)*3+1] = (i*numPoints+j)%2;
+				Vector4f normal = new Vector4f(normals[j]);
+				rotY.transform(normal);
+				n[(i*numPoints+j)*3] = normal.x;
+				n[(i*numPoints+j)*3+1] = normal.y;
+				n[(i*numPoints+j)*3+2] = normal.z;
+				
+				c[(i*numPoints+j)*3+1] = (i*numPoints+j)%2;
 			}
 		}
 		
@@ -78,16 +95,31 @@ public class Bezier {
 		float[] texture = new float[numPoints*numRotStep*2];
 		for(int i=0; i<numRotStep; i++){
 			for(int j=0; j<numPoints; j++){
-				texture[i*2] = ((float)i)/(numRotStep-1);
-				texture[i*2+1] = ((float)j)/(numPoints-1);
+				texture[(i*numPoints+j)*2] = ((float)i)/(numRotStep-1);
+				texture[(i*numPoints+j)*2+1] = ((float)j)/(numPoints-1);
 			}
 		}
 		
 		BezierOut output = new BezierOut();
-		output.v = vertex;
-		output.c = color;
+		output.v = v;
+		output.c = c;
+		output.n = n;
 		output.uv = texture;
 		output.indices = indices;
 		return output;
 	}
+	
+	private Vector4f interpolate(float u){
+		float t = u-((int)u);
+		if(u == C.length){	// last point
+			u = u-1;
+			t = 1;
+		}
+		
+		Vector4f point  = new Vector4f(t*t*t, t*t, t, 1);
+		C[(int)u].transform(point);
+		point.w = 1;
+		return point;
+	}
+	
 }

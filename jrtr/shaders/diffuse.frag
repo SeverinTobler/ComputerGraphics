@@ -49,6 +49,7 @@ void main()
 	}
  
 	// The built-in GLSL function "texture" performs the texture lookup
-	frag_shaded = vec4(c,1) * texture(myTexture, frag_texcoord);
+	//frag_shaded = vec4(c,1) * texture(myTexture, frag_texcoord);
+	frag_shaded = texture(myTexture, frag_texcoord);
 }
 

@@ -40,61 +40,35 @@ public class main
 		{
 			renderContext = r;
 			
-			// Make a simple geometric object: a cube
+			// Make a simple geometric object: a quad
 			
-			// The vertex positions of the cube
-			float v[] = {-1,-1,1, 1,-1,1, 1,1,1, -1,1,1,		// front face
-				         -1,-1,-1, -1,-1,1, -1,1,1, -1,1,-1,	// left face
-					  	 1,-1,-1,-1,-1,-1, -1,1,-1, 1,1,-1,		// back face
-						 1,-1,1, 1,-1,-1, 1,1,-1, 1,1,1,		// right face
-						 1,1,1, 1,1,-1, -1,1,-1, -1,1,1,		// top face
-						-1,-1,1, -1,-1,-1, 1,-1,-1, 1,-1,1};	// bottom face
+			float v[] = { 	1,1,1, 		1,1,-1, 	-1,1,-1, 	-1,1,1,		// top
+							-1,-1,1,	-1,-1,-1, 	1,-1,-1, 	1,-1,1};	// bottom
 
-			// The vertex normals 
-			float n[] = {0,0,1, 0,0,1, 0,0,1, 0,0,1,			// front face
-				         -1,0,0, -1,0,0, -1,0,0, -1,0,0,		// left face
-					  	 0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1,		// back face
-						 1,0,0, 1,0,0, 1,0,0, 1,0,0,			// right face
-						 0,1,0, 0,1,0, 0,1,0, 0,1,0,			// top face
-						 0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0};		// bottom face
+			float c[] = {	1,0,0,	1,1,0, 	1,0,0, 	1,1,0,
+				 			1,1,0, 	1,0,0, 	1,1,0, 	1,0,0 }; 
 
-			// The vertex colors
-			float c[] = {1,0,0, 1,0,0, 1,0,0, 1,0,0,
-					     0,1,0, 0,1,0, 0,1,0, 0,1,0,
-						 1,0,0, 1,0,0, 1,0,0, 1,0,0,
-						 0,1,0, 0,1,0, 0,1,0, 0,1,0,
-						 0,0,1, 0,0,1, 0,0,1, 0,0,1,
-						 0,0,1, 0,0,1, 0,0,1, 0,0,1};
 
-			// Texture coordinates 
-			float uv[] = {0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1};
+			int indices[] = {	0,2,3, 	0,1,2, //top
+								7,3,4, 	7,0,3, //front
+								6,0,7, 	6,1,0, //right
+								5,1,6, 	5,2,1, //back
+								4,2,5, 	4,3,2, //left
+								6,4,5, 	6,7,4  //bottom
+								};
 
 			// Construct a data structure that stores the vertices, their
 			// attributes, and the triangle mesh connectivity
-			VertexData vertexData = renderContext.makeVertexData(24);
+			VertexData vertexData = renderContext.makeVertexData(8);
 			vertexData.addElement(c, VertexData.Semantic.COLOR, 3);
 			vertexData.addElement(v, VertexData.Semantic.POSITION, 3);
-			vertexData.addElement(n, VertexData.Semantic.NORMAL, 3);
-			vertexData.addElement(uv, VertexData.Semantic.TEXCOORD, 2);
-			
-			// The triangles (three vertex indices for each triangle)
-			int indices[] = {0,2,3, 0,1,2,			// front face
-							 4,6,7, 4,5,6,			// left face
-							 8,10,11, 8,9,10,		// back face
-							 12,14,15, 12,13,14,	// right face
-							 16,18,19, 16,17,18,	// top face
-							 20,22,23, 20,21,22};	// bottom face
-
 			vertexData.addIndices(indices);
+			
+			MeshData meshData = new MeshData(vertexData, renderContext);
 								
 			// Make a scene manager and add the object
 			sceneManager = new SimpleSceneManager();
-			shape = new Shape(vertexData);
+			shape = new Shape(meshData.getVertexData());
 			sceneManager.addShape(shape);
 
 			// Add the scene to the renderer
