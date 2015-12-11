@@ -40,10 +40,15 @@ public class main
 		{
 			renderContext = r;
 			
-			
 			Bezier bezier = new Bezier();
-			float[] controlPoints = {0,0, 2,0, 2,2, 0.3f,2, 2,2, 2,4, 0,4};
-			if(!bezier.drawCurve(controlPoints))
+			// Schale
+			//float[] controlPoints = {0,0, 0.25f,0, 0.75f,0, 1,0, 1.5f,0, 1,0.5f, 1.5f,0.5f, 1.75f,0.5f , 1.75f,0.5f, 2,0.5f,	// bottom
+			//		2.1f,0.5f, 2.1f,0.6f, 2,0.6f, 1.75f,0.6f, 1.65f,0.6f, 1.4f,0.6f, 0.9f,0.6f, 1.4f,0.1f, 0.9f,0.1f, 0.65f,0.1f, 0.25f,0.1f, 0,0.1f};	// top
+			// Apfel
+			//float[] controlPoints = {0,0.1f, 0.2f,0, 0,0, 0.2f,0, 1.5f,0, 2,2,  0.3f,2 ,0,1.8f, 0.3f,1.8f, 0,1.8f};
+			// Weinflasche
+			float[] controlPoints = {0,0, 0.25f,0, 0.75f,0, 1,0, 1.25f,0, 1,0.25f, 1,3, 1,3.5f, 0.1f,3.5f, 0.1f,4, 0.1f,4.1f, 0,4, 0,4};
+			if(!bezier.drawCurve( controlPoints))
 				System.out.println("control points do not match with number of segments");
 			
 			BezierOut data = bezier.getShapeData(200, 200);
@@ -54,35 +59,6 @@ public class main
 			vertexData.addElement(data.n, VertexData.Semantic.NORMAL, 3);
 			vertexData.addElement(data.uv, VertexData.Semantic.TEXCOORD, 2);
 			vertexData.addIndices(data.indices);
-			
-			/*
-			// Make a simple geometric object: a cube
-			
-			// The vertex positions of the cube
-			float v[] = {-1,-1,1, 1,-1,1, 1,1,1, -1,1,1,		// front face
-				         -1,-1,-1, -1,-1,1, -1,1,1, -1,1,-1,	// left face
-					  	 1,-1,-1,-1,-1,-1, -1,1,-1, 1,1,-1,		// back face
-						 1,-1,1, 1,-1,-1, 1,1,-1, 1,1,1,		// right face
-						 1,1,1, 1,1,-1, -1,1,-1, -1,1,1,		// top face
-						-1,-1,1, -1,-1,-1, 1,-1,-1, 1,-1,1};	// bottom face
-
-			// The vertex normals 
-			float n[] = {0,0,1, 0,0,1, 0,0,1, 0,0,1,			// front face
-				         -1,0,0, -1,0,0, -1,0,0, -1,0,0,		// left face
-					  	 0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1,		// back face
-						 1,0,0, 1,0,0, 1,0,0, 1,0,0,			// right face
-						 0,1,0, 0,1,0, 0,1,0, 0,1,0,			// top face
-						 0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0};		// bottom face
-
-			// Texture coordinates 
-			float uv[] = {0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1,
-					  0,0, 1,0, 1,1, 0,1};
-
-			*/
 								
 			// Make a scene manager and add the object
 			sceneManager = new SimpleSceneManager();
@@ -126,8 +102,6 @@ public class main
 		    currentstep = basicstep;
 		    timer.scheduleAtFixedRate(new AnimationTask(), 0, 10);
 		}
-
-		
 	}
 
 	/**

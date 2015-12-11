@@ -368,7 +368,8 @@ public class MeshData {
 	 */
 	public void loop() {
 		System.out.println("Start Subdivide with the Loop-algorithm...");
-		List<Vertex> newVertexList = new ArrayList<Vertex>();
+		int numOldIndex = vertexTable.size();
+		List<Vertex> newVertexList = new ArrayList<Vertex>(numOldIndex+faceTable.size());
 		
 		// smooth old vertices
 		for(Vertex v : vertexTable){
@@ -381,7 +382,6 @@ public class MeshData {
 		}
 		
 		// create new triangles
-		int numOldIndex = vertexTable.size();
 		int[] index = new int[faceTable.size()*12];
 		int i = 0;
 		for(Face f : faceTable){
