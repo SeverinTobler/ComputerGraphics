@@ -19,7 +19,9 @@ public class main
 	static RenderContext renderContext;
 	static Shader normalShader;
 	static Shader diffuseShader;
+	static Shader bumpShader;
 	static Material material;
+	static Material leather;
 	static SimpleSceneManager sceneManager;
 	static Shape shape;
 	static float currentstep, basicstep;
@@ -39,7 +41,7 @@ public class main
 		public void init(RenderContext r)
 		{
 			renderContext = r;
-			
+
 			Bezier bezier = new Bezier();
 			// Schale
 			//float[] controlPoints = {0,0, 0.25f,0, 0.75f,0, 1,0, 1.5f,0, 1,0.5f, 1.5f,0.5f, 1.75f,0.5f , 1.75f,0.5f, 2,0.5f,	// bottom
@@ -50,16 +52,16 @@ public class main
 			float[] controlPoints = {0,0, 0.25f,0, 0.75f,0, 1,0, 1.25f,0, 1,0.25f, 1,3, 1,3.5f, 0.1f,3.5f, 0.1f,4, 0.1f,4.1f, 0,4, 0,4};
 			if(!bezier.drawCurve( controlPoints))
 				System.out.println("control points do not match with number of segments");
-			
+
 			BezierOut data = bezier.getShapeData(200, 200);
-			
+
 			VertexData vertexData = renderContext.makeVertexData(data.v.length/3);
 			vertexData.addElement(data.c, VertexData.Semantic.COLOR, 3);
 			vertexData.addElement(data.v, VertexData.Semantic.POSITION, 3);
 			vertexData.addElement(data.n, VertexData.Semantic.NORMAL, 3);
 			vertexData.addElement(data.uv, VertexData.Semantic.TEXCOORD, 2);
 			vertexData.addIndices(data.indices);
-								
+
 			// Make a scene manager and add the object
 			sceneManager = new SimpleSceneManager();
 			shape = new Shape(vertexData);
@@ -67,25 +69,33 @@ public class main
 
 			// Add the scene to the renderer
 			renderContext.setSceneManager(sceneManager);
-			
-			// Load some more shaders
-		    normalShader = renderContext.makeShader();
-		    try {
-		    	normalShader.load("../jrtr/shaders/normal.vert", "../jrtr/shaders/normal.frag");
-		    } catch(Exception e) {
-		    	System.out.print("Problem with shader:\n");
-		    	System.out.print(e.getMessage());
-		    }
-	
-		    diffuseShader = renderContext.makeShader();
-		    try {
-		    	diffuseShader.load("../jrtr/shaders/diffuse.vert", "../jrtr/shaders/diffuse.frag");
-		    } catch(Exception e) {
-		    	System.out.print("Problem with shader:\n");
-		    	System.out.print(e.getMessage());
-		    }
 
-		    // Make a material that can be used for shading
+			// Load some more shaders
+			normalShader = renderContext.makeShader();
+			try {
+				normalShader.load("../jrtr/shaders/normal.vert", "../jrtr/shaders/normal.frag");
+			} catch(Exception e) {
+				System.out.print("Problem with shader:\n");
+				System.out.print(e.getMessage());
+			}
+
+			diffuseShader = renderContext.makeShader();
+			try {
+				diffuseShader.load("../jrtr/shaders/diffuse.vert", "../jrtr/shaders/diffuse.frag");
+			} catch(Exception e) {
+				System.out.print("Problem with shader:\n");
+				System.out.print(e.getMessage());
+			}
+
+			bumpShader = renderContext.makeShader();
+			try {
+				bumpShader.load("../jrtr/shaders/bump.vert", "../jrtr/shaders/bump.frag");
+			} catch(Exception e) {
+				System.out.print("Problem with shader:\n");
+				System.out.print(e.getMessage());
+			}
+			
+			// Make a material that can be used for shading
 			material = new Material();
 			material.shader = diffuseShader;
 			material.diffuseMap = renderContext.makeTexture();
@@ -96,11 +106,23 @@ public class main
 				System.out.print(e.getMessage());
 			}
 
+			// Make a material that can be used for shading
+			leather = new Material();
+			leather.shader = bumpShader;
+			leather.diffuseMap = renderContext.makeTexture();
+			try {
+				material.diffuseMap.load("../textures/leather9_DIFFUSE.jpg");
+				material.normalMap.load("../textures/leather9_NORMAL.jpg");
+			} catch(Exception e) {				
+				System.out.print("Could not load texture.\n");
+				System.out.print(e.getMessage());
+			}
+
 			// Register a timer task
-		    Timer timer = new Timer();
-		    basicstep = 0.01f;
-		    currentstep = basicstep;
-		    timer.scheduleAtFixedRate(new AnimationTask(), 0, 10);
+			Timer timer = new Timer();
+			basicstep = 0.01f;
+			currentstep = basicstep;
+			timer.scheduleAtFixedRate(new AnimationTask(), 0, 10);
 		}
 	}
 
@@ -113,17 +135,17 @@ public class main
 		public void run()
 		{
 			// Update transformation by rotating with angle "currentstep"
-    		Matrix4f t = shape.getTransformation();
-    		Matrix4f rotX = new Matrix4f();
-    		rotX.rotX(currentstep);
-    		Matrix4f rotY = new Matrix4f();
-    		rotY.rotY(currentstep);
-    		t.mul(rotX);
-    		t.mul(rotY);
-    		shape.setTransformation(t);
-    		
-    		// Trigger redrawing of the render window
-    		renderPanel.getCanvas().repaint(); 
+			Matrix4f t = shape.getTransformation();
+			Matrix4f rotX = new Matrix4f();
+			rotX.rotX(currentstep);
+			Matrix4f rotY = new Matrix4f();
+			rotY.rotY(currentstep);
+			t.mul(rotX);
+			t.mul(rotY);
+			shape.setTransformation(t);
+
+			// Trigger redrawing of the render window
+			renderPanel.getCanvas().repaint(); 
 		}
 	}
 
@@ -133,13 +155,13 @@ public class main
 	 */
 	public static class SimpleMouseListener implements MouseListener
 	{
-    	public void mousePressed(MouseEvent e) {}
-    	public void mouseReleased(MouseEvent e) {}
-    	public void mouseEntered(MouseEvent e) {}
-    	public void mouseExited(MouseEvent e) {}
-    	public void mouseClicked(MouseEvent e) {}
+		public void mousePressed(MouseEvent e) {}
+		public void mouseReleased(MouseEvent e) {}
+		public void mouseEntered(MouseEvent e) {}
+		public void mouseExited(MouseEvent e) {}
+		public void mouseClicked(MouseEvent e) {}
 	}
-	
+
 	/**
 	 * A key listener for the main window. Use this to process key events.
 	 * Currently this provides the following controls:
@@ -157,65 +179,65 @@ public class main
 		{
 			switch(e.getKeyChar())
 			{
-				case 's': {
-					// Stop animation
-					currentstep = 0;
-					break;
-				}
-				case 'p': {
-					// Resume animation
-					currentstep = basicstep;
-					break;
-				}
-				case '+': {
-					// Accelerate roation
-					currentstep += basicstep;
-					break;
-				}
-				case '-': {
-					// Slow down rotation
-					currentstep -= basicstep;
-					break;
-				}
-				case 'n': {
-					// Remove material from shape, and set "normal" shader
-					shape.setMaterial(null);
-					renderContext.useShader(normalShader);
-					break;
-				}
-				case 'd': {
-					// Remove material from shape, and set "default" shader
+			case 's': {
+				// Stop animation
+				currentstep = 0;
+				break;
+			}
+			case 'p': {
+				// Resume animation
+				currentstep = basicstep;
+				break;
+			}
+			case '+': {
+				// Accelerate roation
+				currentstep += basicstep;
+				break;
+			}
+			case '-': {
+				// Slow down rotation
+				currentstep -= basicstep;
+				break;
+			}
+			case 'n': {
+				// Remove material from shape, and set "normal" shader
+				shape.setMaterial(null);
+				renderContext.useShader(normalShader);
+				break;
+			}
+			case 'd': {
+				// Remove material from shape, and set "default" shader
+				shape.setMaterial(null);
+				renderContext.useDefaultShader();
+				break;
+			}
+			case 'm': {
+				// Set a material for more complex shading of the shape
+				if(shape.getMaterial() == null) {
+					shape.setMaterial(material);
+				} else
+				{
 					shape.setMaterial(null);
 					renderContext.useDefaultShader();
-					break;
 				}
-				case 'm': {
-					// Set a material for more complex shading of the shape
-					if(shape.getMaterial() == null) {
-						shape.setMaterial(material);
-					} else
-					{
-						shape.setMaterial(null);
-						renderContext.useDefaultShader();
-					}
-					break;
-				}
+				break;
 			}
-			
+			}
+
 			// Trigger redrawing
 			renderPanel.getCanvas().repaint();
 		}
-		
+
 		public void keyReleased(KeyEvent e)
 		{
 		}
 
 		public void keyTyped(KeyEvent e)
-        {
-        }
+		{
+		}
 
 	}
-	
+
 	/**
 	 * The main function opens a 3D rendering window, implemented by the class
 	 * {@link SimpleRenderPanel}. {@link SimpleRenderPanel} is then called backed 
@@ -227,7 +249,7 @@ public class main
 		// Make a render panel. The init function of the renderPanel
 		// (see above) will be called back for initialization.
 		renderPanel = new SimpleRenderPanel();
-		
+
 		// Make the main window of this application and add the renderer to it
 		JFrame jframe = new JFrame("simple");
 		jframe.setSize(500, 500);
@@ -235,11 +257,11 @@ public class main
 		jframe.getContentPane().add(renderPanel.getCanvas());// put the canvas into a JFrame window
 
 		// Add a mouse and key listener
-	    renderPanel.getCanvas().addMouseListener(new SimpleMouseListener());
-	    renderPanel.getCanvas().addKeyListener(new SimpleKeyListener());
+		renderPanel.getCanvas().addMouseListener(new SimpleMouseListener());
+		renderPanel.getCanvas().addKeyListener(new SimpleKeyListener());
 		renderPanel.getCanvas().setFocusable(true);   	    	    
-	    
-	    jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	    jframe.setVisible(true); // show window
+
+		jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		jframe.setVisible(true); // show window
 	}
 }

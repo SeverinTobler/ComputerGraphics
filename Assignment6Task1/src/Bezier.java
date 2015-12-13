@@ -29,7 +29,6 @@ public class Bezier {
 	}
 	
 	public BezierOut getShapeData(int numPoints, int numRotStep){
-		float eps = 0.001f;
 		Vector4f[] points  = new Vector4f[numPoints];
 		Vector4f[] normals  = new Vector4f[numPoints];
 		for(int i=0; i<numPoints; i++){
