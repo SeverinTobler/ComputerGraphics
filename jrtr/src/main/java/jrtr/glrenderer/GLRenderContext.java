@@ -180,8 +180,7 @@ public class GLRenderContext implements RenderContext {
 			int attribIndex = -1;
 			switch (e.getSemantic()) {
 			case POSITION:
-				attribIndex = gl
-				.glGetAttribLocation(activeShaderID, "position");
+				attribIndex = gl.glGetAttribLocation(activeShaderID, "position");
 				break;
 			case NORMAL:
 				attribIndex = gl.glGetAttribLocation(activeShaderID, "normal");
@@ -190,8 +189,10 @@ public class GLRenderContext implements RenderContext {
 				attribIndex = gl.glGetAttribLocation(activeShaderID, "color");
 				break;
 			case TEXCOORD:
-				attribIndex = gl
-				.glGetAttribLocation(activeShaderID, "texcoord");
+				attribIndex = gl.glGetAttribLocation(activeShaderID, "texcoord");
+				break;
+			case TANGENT:
+				attribIndex = gl.glGetAttribLocation(activeShaderID, "tangent");
 				break;
 			}
 
@@ -272,18 +273,18 @@ public class GLRenderContext implements RenderContext {
 			gl.glUniformMatrix4fv(id, 1, false, transformationToFloat16(modelview), 0);
 		id = gl.glGetUniformLocation(activeShaderID, "projection");
 		if(id!=-1)
-		gl.glUniformMatrix4fv(id, 1, false, transformationToFloat16(sceneManager
-						.getFrustum().getProjectionMatrix()), 0);
-		
+			gl.glUniformMatrix4fv(id, 1, false, transformationToFloat16(sceneManager
+					.getFrustum().getProjectionMatrix()), 0);
+
 		id = gl.glGetUniformLocation(activeShaderID, "model");
 		if(id!=-1)
 			gl.glUniformMatrix4fv(id, 1, false, transformationToFloat16(transformation), 0);
-		
+
 		Matrix4f camera = new Matrix4f(sceneManager.getCamera().getCameraMatrix());
 		id = gl.glGetUniformLocation(activeShaderID, "view");
 		if(id!=-1)
 			gl.glUniformMatrix4fv(id, 1, false, transformationToFloat16(camera), 0);
-		
+
 		Vector4f camera_position = new Vector4f();
 		camera.getColumn(3, camera_position);
 		id = gl.glGetUniformLocation(activeShaderID, "camera");
@@ -322,12 +323,25 @@ public class GLRenderContext implements RenderContext {
 				id = gl.glGetUniformLocation(activeShaderID, "myTexture");
 				gl.glUniform1i(id, 0);	// The variable in the shader needs to be set to the desired texture unit, i.e., 0
 			}
-			
+
+			// Activate the normal map, if the material has one [ST]
+			if(m.normalMap != null) {
+				// OpenGL calls to activate the texture 
+				gl.glActiveTexture(GL3.GL_TEXTURE1);	// Work with texture unit 1
+				gl.glEnable(GL3.GL_TEXTURE_2D);
+				gl.glBindTexture(GL3.GL_TEXTURE_2D, ((GLTexture)m.normalMap).getId());
+				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_LINEAR);
+				gl.glTexParameteri(GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_LINEAR);
+				// We assume the texture in the shader is called "myTexture"
+				id = gl.glGetUniformLocation(activeShaderID, "myNormalMap");
+				gl.glUniform1i(id, 1);	// The variable in the shader needs to be set to the desired texture unit, i.e., 1
+			}
+
 			// => [ST]
 			id = gl.glGetUniformLocation(activeShaderID, "k_diffuse");
 			if(id!=-1)
 				gl.glUniform3f(id, m.diffuse.x, m.diffuse.y, m.diffuse.z);
-			
+
 			id = gl.glGetUniformLocation(activeShaderID, "k_specular");
 			if(id!=-1)
 				gl.glUniform3f(id, m.specular.x, m.specular.y, m.specular.z);
@@ -338,7 +352,7 @@ public class GLRenderContext implements RenderContext {
 			if(id!=-1)
 				gl.glUniform1f(id, m.shininess);
 			// <= [ST]
-			
+
 
 			// Pass a default light source to shader
 			String lightString = "lightDirection[" + 0 + "]";			
@@ -404,7 +418,7 @@ public class GLRenderContext implements RenderContext {
 					//else
 					//	System.out.print("Could not get location of uniform variable " + lightString + "\n");
 					// <= [ST]
-					
+
 					nLights++;
 				}
 

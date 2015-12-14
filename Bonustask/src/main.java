@@ -20,11 +20,22 @@ public class main
 	static Shader normalShader;
 	static Shader diffuseShader;
 	static Shader bumpShader;
-	static Material material;
+	static Material stone;
 	static Material leather;
+	static Material metal;
+	static Material orange;
+	static Material glass;
 	static SimpleSceneManager sceneManager;
 	static Shape shape;
 	static float currentstep, basicstep;
+	static boolean forwards;
+	static boolean backwards;
+	static boolean yawP;
+	static boolean yawN;
+	static boolean rollP;
+	static boolean rollN;
+	static boolean pitchP;
+	static boolean pitchN;
 
 	/**
 	 * An extension of {@link GLRenderPanel} or {@link SWRenderPanel} to 
@@ -44,28 +55,63 @@ public class main
 
 			Bezier bezier = new Bezier();
 			// Schale
-			//float[] controlPoints = {0,0, 0.25f,0, 0.75f,0, 1,0, 1.5f,0, 1,0.5f, 1.5f,0.5f, 1.75f,0.5f , 1.75f,0.5f, 2,0.5f,	// bottom
-			//		2.1f,0.5f, 2.1f,0.6f, 2,0.6f, 1.75f,0.6f, 1.65f,0.6f, 1.4f,0.6f, 0.9f,0.6f, 1.4f,0.1f, 0.9f,0.1f, 0.65f,0.1f, 0.25f,0.1f, 0,0.1f};	// top
-			// Apfel
-			//float[] controlPoints = {0,0.1f, 0.2f,0, 0,0, 0.2f,0, 1.5f,0, 2,2,  0.3f,2 ,0,1.8f, 0.3f,1.8f, 0,1.8f};
-			// Weinflasche
-			float[] controlPoints = {0,0, 0.25f,0, 0.75f,0, 1,0, 1.25f,0, 1,0.25f, 1,3, 1,3.5f, 0.1f,3.5f, 0.1f,4, 0.1f,4.1f, 0,4, 0,4};
+			float[] controlPoints = {0,0, 0.25f,0, 1.75f,0, 2,0, 2.5f,0, 2,0.5f, 2.5f,0.5f, 2.75f,0.5f , 2.75f,0.5f, 3,0.5f,	// bottom
+					3.1f,0.5f, 3.1f,0.6f, 3,0.6f, 2.75f,0.6f, 2.65f,0.6f, 2.4f,0.6f, 1.9f,0.6f, 2.4f,0.1f, 0.9f,0.1f, 0.65f,0.1f, 0.25f,0.1f, 0,0.1f};	// top
 			if(!bezier.drawCurve( controlPoints))
 				System.out.println("control points do not match with number of segments");
-
 			BezierOut data = bezier.getShapeData(200, 200);
-
 			VertexData vertexData = renderContext.makeVertexData(data.v.length/3);
 			vertexData.addElement(data.c, VertexData.Semantic.COLOR, 3);
 			vertexData.addElement(data.v, VertexData.Semantic.POSITION, 3);
 			vertexData.addElement(data.n, VertexData.Semantic.NORMAL, 3);
 			vertexData.addElement(data.uv, VertexData.Semantic.TEXCOORD, 2);
+			vertexData.addElement(data.t, VertexData.Semantic.TANGENT, 3);
 			vertexData.addIndices(data.indices);
+			Shape plate = new Shape(vertexData);
+			
+			// Weinflasche
+			controlPoints = new float[] {0,0, 0.25f,0, 0.75f,0, 1,0, 1.25f,0, 1,0.25f, 1,3, 1,3.5f, 0.3f,3.5f, 0.3f,4, 0.3f,4.1f, 0,4, 0,4};
+			if(!bezier.drawCurve( controlPoints))
+				System.out.println("control points do not match with number of segments");
+			data = bezier.getShapeData(200, 200);
+			vertexData = renderContext.makeVertexData(data.v.length/3);
+			vertexData.addElement(data.c, VertexData.Semantic.COLOR, 3);
+			vertexData.addElement(data.v, VertexData.Semantic.POSITION, 3);
+			vertexData.addElement(data.n, VertexData.Semantic.NORMAL, 3);
+			vertexData.addElement(data.uv, VertexData.Semantic.TEXCOORD, 2);
+			vertexData.addElement(data.t, VertexData.Semantic.TANGENT, 3);
+			vertexData.addIndices(data.indices);
+			Shape bottle = new Shape(vertexData);			
+			
+			// Apfel
+			controlPoints = new float[] {0,0.1f, 0.2f,0, 0,0, 0.2f,0, 1.5f,0, 2,2,  0.3f,2 ,0,1.8f, 0.3f,1.8f, 0,1.8f};
+			if(!bezier.drawCurve( controlPoints))
+				System.out.println("control points do not match with number of segments");
+			data = bezier.getShapeData(200, 200);
+			vertexData = renderContext.makeVertexData(data.v.length/3);
+			vertexData.addElement(data.c, VertexData.Semantic.COLOR, 3);
+			vertexData.addElement(data.v, VertexData.Semantic.POSITION, 3);
+			vertexData.addElement(data.n, VertexData.Semantic.NORMAL, 3);
+			vertexData.addElement(data.uv, VertexData.Semantic.TEXCOORD, 2);
+			vertexData.addElement(data.t, VertexData.Semantic.TANGENT, 3);
+			vertexData.addIndices(data.indices);
+			shape = new Shape(vertexData);
 
+			
+			Shape floor = new Cube(renderContext, 10f, 0.1f, 10);
+			
 			// Make a scene manager and add the object
 			sceneManager = new SimpleSceneManager();
-			shape = new Shape(vertexData);
 			sceneManager.addShape(shape);
+			sceneManager.addShape(floor);
+			sceneManager.addShape(plate);
+			sceneManager.addShape(bottle);
+
+			// create light
+			Light l = new Light();
+			l.diffuse = new Vector3f(1f,1f,1f);
+			l.direction = new Vector3f(0f,0f,1f);
+			sceneManager.addLight(l);
 
 			// Add the scene to the renderer
 			renderContext.setSceneManager(sceneManager);
@@ -96,25 +142,61 @@ public class main
 			}
 			
 			// Make a material that can be used for shading
-			material = new Material();
-			material.shader = diffuseShader;
-			material.diffuseMap = renderContext.makeTexture();
+			glass = new Material();
+			glass.shader = diffuseShader;
+			glass.diffuseMap = renderContext.makeTexture();
 			try {
-				material.diffuseMap.load("../textures/plant.jpg");
-			} catch(Exception e) {				
-				System.out.print("Could not load texture.\n");
+				glass.diffuseMap.load("../textures/glass.jpg");
+			} catch(Exception e) {
+				System.out.print("Could not load texture (glass).\n");
+				System.out.print(e.getMessage());
+			}
+			
+			stone = new Material();
+			stone.shader = bumpShader;
+			stone.diffuseMap = renderContext.makeTexture();
+			stone.normalMap = renderContext.makeTexture();
+			try {
+				stone.diffuseMap.load("../textures/stone.jpg");
+				stone.normalMap.load("../textures/stone_norm.jpg");
+			} catch(Exception e) {
+				System.out.print("Could not load texture (stone).\n");
 				System.out.print(e.getMessage());
 			}
 
-			// Make a material that can be used for shading
 			leather = new Material();
 			leather.shader = bumpShader;
 			leather.diffuseMap = renderContext.makeTexture();
+			leather.normalMap = renderContext.makeTexture();
 			try {
-				material.diffuseMap.load("../textures/leather9_DIFFUSE.jpg");
-				material.normalMap.load("../textures/leather9_NORMAL.jpg");
+				leather.diffuseMap.load("../textures/leather9_DIFFUSE.jpg");
+				leather.normalMap.load("../textures/leather9_NORMAL.jpg");
 			} catch(Exception e) {				
-				System.out.print("Could not load texture.\n");
+				System.out.print("Could not load texture (leather).\n");
+				System.out.print(e.getMessage());
+			}
+
+			orange = new Material();
+			orange.shader = bumpShader;
+			orange.diffuseMap = renderContext.makeTexture();
+			orange.normalMap = renderContext.makeTexture();
+			try {
+				orange.diffuseMap.load("../textures/orange.jpg");
+				orange.normalMap.load("../textures/orange_norm.jpg");
+			} catch(Exception e) {				
+				System.out.print("Could not load texture (orange).\n");
+				System.out.print(e.getMessage());
+			}
+			
+			metal = new Material();
+			metal.shader = bumpShader;
+			metal.diffuseMap = renderContext.makeTexture();
+			metal.normalMap = renderContext.makeTexture();
+			try {
+				metal.diffuseMap.load("../textures/metal.jpg");
+				metal.normalMap.load("../textures/metal_norm.jpg");
+			} catch(Exception e) {				
+				System.out.print("Could not load texture (metal).\n");
 				System.out.print(e.getMessage());
 			}
 
@@ -123,6 +205,25 @@ public class main
 			basicstep = 0.01f;
 			currentstep = basicstep;
 			timer.scheduleAtFixedRate(new AnimationTask(), 0, 10);
+			
+			
+			// build scene
+			floor.setMaterial(stone);
+			Matrix4f t = floor.getTransformation();
+			t.m13 = -0.1f;
+			
+			plate.setMaterial(metal);
+			
+			bottle.setMaterial(glass);
+			t = bottle.getTransformation();
+			t.m03 = 3.5f;
+			t.m23 = 3.5f;
+			
+			shape.setMaterial(orange);
+			t = shape.getTransformation();
+			t.m13 = 0.1f;
+			t.m03 = -0.3f;
+			t.m23 = 0.1f;
 		}
 	}
 
@@ -134,21 +235,77 @@ public class main
 	{
 		public void run()
 		{
-			// Update transformation by rotating with angle "currentstep"
-			Matrix4f t = shape.getTransformation();
-			Matrix4f rotX = new Matrix4f();
-			rotX.rotX(currentstep);
-			Matrix4f rotY = new Matrix4f();
-			rotY.rotY(currentstep);
-			t.mul(rotX);
-			t.mul(rotY);
-			shape.setTransformation(t);
-
-			// Trigger redrawing of the render window
+			// camera
+			camera();
+			
 			renderPanel.getCanvas().repaint(); 
 		}
-	}
+		
+		private void camera(){
+			float d_angle = 0.01f;
+			float d_distance = 0.1f;
 
+			float trans = 0, alpha = 0, beta = 0, gamma = 0;
+
+			if(forwards)
+				trans = trans + d_distance;
+			if(backwards)
+				trans = trans - d_distance;
+			if(yawP)
+				beta = beta + d_angle;
+			if(yawN)
+				beta = beta - d_angle;
+			if(pitchP)
+				alpha = alpha + d_angle;
+			if(pitchN)
+				alpha = alpha - d_angle;
+			if(rollP)
+				gamma = gamma + d_angle;
+			if(rollN)
+				gamma = gamma - d_angle;
+
+			if(!(trans == 0 && alpha == 0 && beta == 0 && gamma == 0)){
+				Matrix4f rot = new Matrix4f();
+				Vector4f x = new Vector4f();
+				Vector4f y = new Vector4f();
+				Vector4f z = new Vector4f();
+				Vector4f t = new Vector4f();
+				Vector4f dt = new Vector4f(0,0,-trans,0);
+				Matrix4f c = sceneManager.getCamera().getCameraMatrix();
+				c.invert();
+				c.getColumn(0, x);
+				c.getColumn(1, y);
+				c.getColumn(2, z);
+
+				rot.setIdentity();
+				rot.setRotation(new AxisAngle4f(x.x, x.y, x.z, alpha));
+				rot.transform(y);
+				rot.transform(z);
+
+				rot.setIdentity();
+				rot.setRotation(new AxisAngle4f(y.x, y.y, y.z, beta));
+				rot.transform(x);
+				rot.transform(z);
+
+				rot.setIdentity();
+				rot.setRotation(new AxisAngle4f(z.x, z.y, z.z, gamma));
+				rot.transform(x);
+				rot.transform(y);
+
+				c.setColumn(0,x);
+				c.setColumn(1,y);
+				c.setColumn(2,z);
+				c.getColumn(3, t);
+				c.transform(dt);
+				t.add(dt);
+				c.setColumn(3,t);
+
+				c.invert();
+				sceneManager.getCamera().setCameraMatrix(c);
+			}
+		}
+	}
+	
 	/**
 	 * A mouse listener for the main window of this application. This can be
 	 * used to process mouse events.
@@ -177,44 +334,49 @@ public class main
 	{
 		public void keyPressed(KeyEvent e)
 		{
-			switch(e.getKeyChar())
+			switch(e.getKeyCode())
 			{
-			case 's': {
-				// Stop animation
-				currentstep = 0;
+			case KeyEvent.VK_W: {
+				forwards = true;
 				break;
 			}
-			case 'p': {
-				// Resume animation
-				currentstep = basicstep;
+			case KeyEvent.VK_S: {
+				backwards = true;
 				break;
 			}
-			case '+': {
-				// Accelerate roation
-				currentstep += basicstep;
+			case (char) KeyEvent.VK_UP: {
+				pitchP = true;
 				break;
 			}
-			case '-': {
-				// Slow down rotation
-				currentstep -= basicstep;
+			case (char) KeyEvent.VK_DOWN: {
+				pitchN = true;
 				break;
 			}
-			case 'n': {
+			case KeyEvent.VK_A: {
+				yawP = true;
+				break;
+			}
+			case KeyEvent.VK_D: {
+				yawN = true;
+				break;
+			}
+			case (char) KeyEvent.VK_LEFT: {
+				rollP = true;
+				break;
+			}
+			case (char) KeyEvent.VK_RIGHT: {
+				rollN = true;
+				break;
+			}
+			case (char) KeyEvent.VK_N: {
 				// Remove material from shape, and set "normal" shader
 				shape.setMaterial(null);
 				renderContext.useShader(normalShader);
 				break;
 			}
-			case 'd': {
-				// Remove material from shape, and set "default" shader
-				shape.setMaterial(null);
-				renderContext.useDefaultShader();
-				break;
-			}
-			case 'm': {
-				// Set a material for more complex shading of the shape
+			case (char) KeyEvent.VK_M: {
 				if(shape.getMaterial() == null) {
-					shape.setMaterial(material);
+					shape.setMaterial(orange);
 				} else
 				{
 					shape.setMaterial(null);
@@ -225,11 +387,49 @@ public class main
 			}
 
 			// Trigger redrawing
-			renderPanel.getCanvas().repaint();
+			//renderPanel.getCanvas().repaint();
 		}
 
 		public void keyReleased(KeyEvent e)
 		{
+			switch(e.getKeyCode())
+			{
+			case KeyEvent.VK_W: {
+				forwards = false;
+				break;
+			}
+			case KeyEvent.VK_S: {
+				backwards = false;
+				break;
+			}
+			case KeyEvent.VK_A: {
+				yawP = false;
+				break;
+			}
+			case KeyEvent.VK_D: {
+				yawN = false;
+				break;
+			}
+			case (char) KeyEvent.VK_UP: {
+				pitchP = false;
+				break;
+			}
+			case (char) KeyEvent.VK_DOWN: {
+				pitchN = false;
+				break;
+			}
+			case (char) KeyEvent.VK_LEFT: {
+				rollP = false;
+				break;
+			}
+			case (char) KeyEvent.VK_RIGHT: {
+				rollN = false;
+				break;
+			}
+			}
+
+			// Trigger redrawing
+			//renderPanel.getCanvas().repaint();
 		}
 
 		public void keyTyped(KeyEvent e)

@@ -31,19 +31,19 @@ public class Bezier {
 	public BezierOut getShapeData(int numPoints, int numRotStep){
 		Vector4f[] points  = new Vector4f[numPoints];
 		Vector4f[] normals  = new Vector4f[numPoints];
+		Vector4f[] tangents  = new Vector4f[numPoints];
 		for(int i=0; i<numPoints; i++){
 			// points
 			float u = (float)(C.length*i)/(numPoints-1);
 			points[i] = interpolate(u);
 			
-			// normals
-			normals[i] = interpolateTangent(u);
+			// tangents & normals
+			tangents[i] = interpolateTangent(u);
+			tangents[i].scale(1/tangents[i].length());
 			// compute normalized normal from tangent
-			float temp = normals[i].x;
-			normals[i].x = normals[i].y;
-			normals[i].y = -temp;
-			normals[i].scale(1/normals[i].length());
-			
+			normals[i] = new Vector4f(tangents[i]);
+			normals[i].x = tangents[i].y;
+			normals[i].y = -tangents[i].x;
 		}
 		
 		
@@ -52,6 +52,7 @@ public class Bezier {
 		float[] c = new float[3*numPoints*numRotStep];
 		float[] n = new float[3*numPoints*numRotStep];
 		float[] v = new float[3*numPoints*numRotStep];
+		float[] t = new float[3*numPoints*numRotStep];
 		for(int i=0; i<numRotStep; i++){
 			float angle = (float)(2*Math.PI*i/(numRotStep-1));
 			Matrix4f rotY = new Matrix4f();
@@ -70,6 +71,12 @@ public class Bezier {
 				n[(i*numPoints+j)*3+2] = normal.z;
 				
 				c[(i*numPoints+j)*3+1] = (i*numPoints+j)%2;
+				
+				Vector4f tangent = new Vector4f(tangents[j]);
+				rotY.transform(tangent);
+				t[(i*numPoints+j)*3] = tangent.x;
+				t[(i*numPoints+j)*3+1] = tangent.y;
+				t[(i*numPoints+j)*3+2] = tangent.z;
 			}
 		}
 		
@@ -100,6 +107,7 @@ public class Bezier {
 		output.c = c;
 		output.n = n;
 		output.uv = texture;
+		output.t = t;
 		output.indices = indices;
 		return output;
 	}

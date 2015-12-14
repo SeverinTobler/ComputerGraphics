@@ -4,5 +4,6 @@ public class BezierOut {
 	public float c[];
 	public float n[];
 	public float uv[];
+	public float t[];
 	public int indices[];
 }

@@ -123,6 +123,6 @@ public abstract class VertexData {
 	 * coordinates.
 	 */
 	public enum Semantic {
-		POSITION, NORMAL, TEXCOORD, COLOR
+		POSITION, NORMAL, TEXCOORD, COLOR, TANGENT
 	}
 }
